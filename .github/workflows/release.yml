@@ -1,0 +1,66 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with tsdown
+        run: npm run build
+
+      - name: Create Release Tag
+        id: create_tag
+        run: |
+          # Generate timestamp-based version
+          VERSION="v$(date +%Y.%m.%d-%H%M%S)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $VERSION
+          git push origin $VERSION
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create_tag.outputs.version }}
+          name: Release ${{ steps.create_tag.outputs.version }}
+          body: |
+            Automated release from merged PR
+
+            ## Installation
+
+            Download the artifacts and run:
+            ```bash
+            npm install -g .
+            ```
+
+            Or use directly with node:
+            ```bash
+            node dist/mcp-server.js
+            node dist/worker.js
+            ```
+          files: |
+            dist/mcp-server.js
+            dist/worker.js
+            package.json
+          draft: false
+          prerelease: false
