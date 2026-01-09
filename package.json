@@ -5,14 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "agent-todo-server": "./dist/mcp-server.js",
-    "agent-todo-worker": "./dist/worker.js"
+    "agent-todo": "./dist/index.js"
   },
   "scripts": {
     "build": "tsdown",
-    "dev": "tsx watch src/mcp-server.ts",
-    "start:server": "node dist/mcp-server.js",
-    "start:worker": "node dist/worker.js"
+    "dev:server": "tsx watch src/index.ts server",
+    "dev:worker": "tsx src/index.ts",
+    "start": "node dist/index.js"
   },
   "keywords": [
     "mcp",

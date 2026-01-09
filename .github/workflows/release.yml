@@ -55,12 +55,12 @@ jobs:
 
             Or use directly with node:
             ```bash
-            node dist/mcp-server.js
-            node dist/worker.js
+            node dist/index.js           # Run worker (default)
+            node dist/index.js worker    # Run worker (explicit)
+            node dist/index.js server    # Run MCP server
             ```
           files: |
-            dist/mcp-server.js
-            dist/worker.js
+            dist/index.js
             package.json
           draft: false
           prerelease: false

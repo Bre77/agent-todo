@@ -2,8 +2,7 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig({
   entry: {
-    'mcp-server': 'src/mcp-server.ts',
-    'worker': 'src/worker.ts',
+    'index': 'src/index.ts',
   },
   format: ['esm'],
   platform: 'node',

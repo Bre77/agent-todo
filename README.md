@@ -4,10 +4,10 @@ A task queue system for parallel agent workflows using the Model Context Protoco
 
 ## Overview
 
-Agent Todo provides two components:
+Agent Todo is a single binary with two modes:
 
-1. **MCP Server** (`agent-todo-server`): A Model Context Protocol server that exposes tools for queueing tasks
-2. **Worker CLI** (`agent-todo-worker`): A command-line tool that processes queued tasks by creating git worktrees and executing Claude Code
+1. **Worker Mode** (default): Processes queued tasks by creating git worktrees and executing Claude Code
+2. **Server Mode**: A Model Context Protocol server that exposes tools for queueing tasks
 
 ## Use Case
 
@@ -41,7 +41,7 @@ Add the MCP server to your Claude Code configuration. Edit your Claude Code MCP 
   "mcpServers": {
     "agent-todo": {
       "command": "node",
-      "args": ["/path/to/agent-todo/dist/mcp-server.js"]
+      "args": ["/path/to/agent-todo/dist/index.js", "server"]
     }
   }
 }
@@ -53,7 +53,8 @@ Or if installed globally:
 {
   "mcpServers": {
     "agent-todo": {
-      "command": "agent-todo-server"
+      "command": "agent-todo",
+      "args": ["server"]
     }
   }
 }
@@ -83,13 +84,17 @@ You can view queued tasks by checking `~/.agent-todo/queue.json` directly.
 Run the worker to process the oldest queued task:
 
 ```bash
-npm run start:worker
+npm start
+# or explicitly:
+npm start worker
 ```
 
 Or if installed globally:
 
 ```bash
-agent-todo-worker
+agent-todo
+# or explicitly:
+agent-todo worker
 ```
 
 The worker will:
@@ -132,9 +137,9 @@ Tasks are stored in `~/.agent-todo/queue.json` as a simple JSON file. Each task 
 > Use queue_task to fix the login bug
 
 # In terminal - process tasks in parallel
-$ agent-todo-worker  # Terminal 1
-$ agent-todo-worker  # Terminal 2
-$ agent-todo-worker  # Terminal 3
+$ agent-todo  # Terminal 1
+$ agent-todo  # Terminal 2
+$ agent-todo  # Terminal 3
 
 # Each worker creates a separate worktree and works independently
 # Review and create PRs for each completed task
@@ -147,18 +152,20 @@ $ agent-todo-worker  # Terminal 3
 npm install
 
 # Run in development mode
-npm run dev
+npm run dev:worker   # Worker mode (default)
+npm run dev:server   # Server mode
 
 # Build
 npm run build
 
 # Run built version
-npm run start:server  # For MCP server
-npm run start:worker  # For worker
+npm start           # Worker mode (default)
+node dist/index.js server  # Server mode
 ```
 
 ## Architecture
 
+- **Main Entry** (`src/index.ts`): Routes to server or worker based on command-line args
 - **Queue Manager** (`src/queue.ts`): Handles task storage and retrieval
 - **MCP Server** (`src/mcp-server.ts`): Exposes MCP protocol tools over stdio
 - **Worker** (`src/worker.ts`): Processes tasks by creating worktrees and running Claude Code
@@ -166,10 +173,11 @@ npm run start:worker  # For worker
 ### Build System
 
 This project uses [tsdown](https://github.com/egoist/tsdown) for building, which:
-- Bundles all dependencies into single executable files
+- Bundles all dependencies and modules into a single executable file
 - Produces optimized, minified output
-- Results in fast startup times and small file sizes
+- Results in fast startup times and minimal file size
 - Automatically includes the shebang (`#!/usr/bin/env node`) for direct execution
+- Tree-shakes unused code for smaller bundles
 
 ### Continuous Integration
 

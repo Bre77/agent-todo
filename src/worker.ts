@@ -1,12 +1,8 @@
-#!/usr/bin/env node
-
 import { spawnSync } from 'child_process';
 import { homedir } from 'os';
 import { join, basename } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { TaskQueue } from './queue.js';
-
-const queue = new TaskQueue();
 
 function createWorktree(repoPath: string, baseBranch: string, taskId: string): string | null {
   const worktreesDir = join(homedir(), 'worktrees');
@@ -74,7 +70,8 @@ function cleanupWorktree(repoPath: string, worktreePath: string): void {
   }
 }
 
-async function processTask() {
+export async function runWorker() {
+  const queue = new TaskQueue();
   const task = queue.getOldestQueuedTask();
 
   if (!task) {
@@ -119,9 +116,3 @@ async function processTask() {
     queue.updateTaskStatus(task.id, 'failed');
   }
 }
-
-// Main execution
-processTask().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
