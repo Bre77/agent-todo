@@ -7,18 +7,15 @@ async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  // Default to worker if no command specified
-  if (!command || command === 'worker') {
-    await runWorker();
-  } else if (command === 'server') {
+  if (command === 'server') {
     await startServer();
+  } else if (!command || command === 'worker') {
+    // Worker mode - pass any remaining args to Claude Code
+    const extraArgs = command === 'worker' ? args.slice(1) : args;
+    await runWorker(extraArgs);
   } else {
-    console.error(`Unknown command: ${command}`);
-    console.error('\nUsage:');
-    console.error('  agent-todo         Run worker (process next queued task)');
-    console.error('  agent-todo worker  Run worker (process next queued task)');
-    console.error('  agent-todo server  Run MCP server');
-    process.exit(1);
+    // First arg is not 'server' or 'worker', treat as worker with all args
+    await runWorker(args);
   }
 }
 

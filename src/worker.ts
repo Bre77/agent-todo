@@ -38,12 +38,17 @@ function createWorktree(repoPath: string, baseBranch: string, taskId: string): s
   return worktreePath;
 }
 
-function runClaudeCode(worktreePath: string, prompt: string): boolean {
+function runClaudeCode(worktreePath: string, prompt: string, extraArgs: string[]): boolean {
   console.log('\n=== Running Claude Code ===');
   console.log(`Working directory: ${worktreePath}`);
-  console.log(`Prompt: ${prompt}\n`);
+  console.log(`Prompt: ${prompt}`);
+  if (extraArgs.length > 0) {
+    console.log(`Extra args: ${extraArgs.join(' ')}`);
+  }
+  console.log();
 
-  const result = spawnSync('claude', ['code', '-m', prompt], {
+  const claudeArgs = ['code', '-m', prompt, ...extraArgs];
+  const result = spawnSync('claude', claudeArgs, {
     cwd: worktreePath,
     stdio: 'inherit',
   });
@@ -70,7 +75,7 @@ function cleanupWorktree(repoPath: string, worktreePath: string): void {
   }
 }
 
-export async function runWorker() {
+export async function runWorker(extraArgs: string[] = []) {
   const queue = new TaskQueue();
   const task = queue.getOldestQueuedTask();
 
@@ -97,8 +102,8 @@ export async function runWorker() {
     return;
   }
 
-  // Run Claude Code
-  const success = runClaudeCode(worktreePath, task.prompt);
+  // Run Claude Code with extra args
+  const success = runClaudeCode(worktreePath, task.prompt, extraArgs);
 
   if (success) {
     console.log('\n=== Task completed successfully ===');

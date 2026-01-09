@@ -97,6 +97,19 @@ agent-todo
 agent-todo worker
 ```
 
+You can pass additional arguments to Claude Code:
+
+```bash
+# Pass Claude Code flags
+agent-todo --verbose
+agent-todo --model opus
+
+# With explicit worker command
+agent-todo worker --verbose --model opus
+```
+
+Any arguments after the command (or all arguments if no command is specified) will be forwarded to Claude Code.
+
 The worker will:
 1. Find the oldest queued task
 2. Create a git worktree in `~/worktrees/`
@@ -140,6 +153,11 @@ Tasks are stored in `~/.agent-todo/queue.json` as a simple JSON file. Each task 
 $ agent-todo  # Terminal 1
 $ agent-todo  # Terminal 2
 $ agent-todo  # Terminal 3
+
+# Or with custom Claude Code flags
+$ agent-todo --verbose         # Terminal 1 - verbose output
+$ agent-todo --model opus      # Terminal 2 - use Opus model
+$ agent-todo --auto-approve    # Terminal 3 - auto-approve changes
 
 # Each worker creates a separate worktree and works independently
 # Review and create PRs for each completed task
