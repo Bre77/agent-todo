@@ -181,6 +181,14 @@ npm run start:worker  # For worker
 - **MCP Server** (`src/mcp-server.ts`): Exposes MCP protocol tools over stdio
 - **Worker** (`src/worker.ts`): Processes tasks by creating worktrees and running Claude Code
 
+### Build System
+
+This project uses [tsdown](https://github.com/egoist/tsdown) for building, which:
+- Bundles all dependencies into single executable files
+- Produces optimized, minified output
+- Results in fast startup times and small file sizes
+- Automatically includes the shebang (`#!/usr/bin/env node`) for direct execution
+
 ## Requirements
 
 - Node.js 18+
