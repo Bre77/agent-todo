@@ -12,6 +12,6 @@ export default defineConfig({
     js: '#!/usr/bin/env node',
   },
   treeshake: true,
-  bundle: true,
+  unbundle: false,
   skipNodeModulesBundle: false,
 });
