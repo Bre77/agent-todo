@@ -61,7 +61,7 @@ Or if installed globally:
 
 ### 2. Queue Tasks from Claude Code
 
-Once configured, Claude Code will have access to the following tools:
+Once configured, Claude Code will have access to the `queue_task` tool:
 
 #### `queue_task`
 
@@ -76,23 +76,7 @@ queue_task({
 })
 ```
 
-#### `list_tasks`
-
-View all tasks in the queue with their current status.
-
-```typescript
-list_tasks({})
-```
-
-#### `remove_task`
-
-Remove a task from the queue.
-
-```typescript
-remove_task({
-  taskId: "task-1234567890-abc123"
-})
-```
+You can view queued tasks by checking `~/.agent-todo/queue.json` directly.
 
 ### 3. Process Tasks
 
@@ -113,16 +97,14 @@ The worker will:
 2. Create a git worktree in `~/worktrees/`
 3. Create a new branch for the task
 4. Execute Claude Code with the provided prompt
-5. Leave the worktree intact for review
+5. On success: automatically clean up the worktree
+6. On failure: leave the worktree for debugging
 
 ### 4. Review and Create PR
 
-After the worker completes:
+For successful tasks, the worktree is automatically cleaned up. You can review the changes in the repository and create a PR from the task branch.
 
-1. Navigate to the worktree directory shown in the output
-2. Review the changes made by Claude Code
-3. Create a pull request if satisfied
-4. Clean up the worktree when done:
+For failed tasks, the worktree is left intact for debugging. Clean it up manually when done:
 
 ```bash
 cd /path/to/original/repo
@@ -188,6 +170,13 @@ This project uses [tsdown](https://github.com/egoist/tsdown) for building, which
 - Produces optimized, minified output
 - Results in fast startup times and small file sizes
 - Automatically includes the shebang (`#!/usr/bin/env node`) for direct execution
+
+### Continuous Integration
+
+GitHub Actions automatically builds and releases the project when PRs are merged to the main branch:
+- Builds with tsdown
+- Creates timestamped releases
+- Attaches compiled binaries as release artifacts
 
 ## Requirements
 

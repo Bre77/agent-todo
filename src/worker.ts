@@ -105,25 +105,19 @@ async function processTask() {
 
   if (success) {
     console.log('\n=== Task completed successfully ===');
-    console.log(`Worktree location: ${worktreePath}`);
-    console.log('\nNext steps:');
-    console.log(`  1. Review changes in: ${worktreePath}`);
-    console.log(`  2. Create PR if satisfied`);
-    console.log(`  3. Cleanup worktree: git worktree remove ${worktreePath}`);
-
     queue.updateTaskStatus(task.id, 'completed');
+
+    // Cleanup worktree on success
+    cleanupWorktree(task.repoPath, worktreePath);
   } else {
     console.error('\n=== Task failed ===');
     console.log(`Worktree location: ${worktreePath}`);
     console.log('You can investigate the issue and manually fix it.');
+    console.log('Run the following command to remove it when done:');
+    console.log(`  cd ${task.repoPath} && git worktree remove ${worktreePath}`);
 
     queue.updateTaskStatus(task.id, 'failed');
   }
-
-  // Ask user if they want to cleanup
-  console.log('\nNote: Worktree has been left intact for review.');
-  console.log('Run the following command to remove it when done:');
-  console.log(`  cd ${task.repoPath} && git worktree remove ${worktreePath}`);
 }
 
 // Main execution

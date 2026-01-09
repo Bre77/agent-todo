@@ -48,28 +48,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['repoPath', 'baseBranch', 'prompt'],
         },
       },
-      {
-        name: 'list_tasks',
-        description: 'List all tasks in the queue with their current status',
-        inputSchema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-      {
-        name: 'remove_task',
-        description: 'Remove a task from the queue by its ID',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            taskId: {
-              type: 'string',
-              description: 'The ID of the task to remove',
-            },
-          },
-          required: ['taskId'],
-        },
-      },
     ],
   };
 });
@@ -77,74 +55,26 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
-  switch (name) {
-    case 'queue_task': {
-      const { repoPath, baseBranch, prompt } = args as {
-        repoPath: string;
-        baseBranch: string;
-        prompt: string;
-      };
+  if (name === 'queue_task') {
+    const { repoPath, baseBranch, prompt } = args as {
+      repoPath: string;
+      baseBranch: string;
+      prompt: string;
+    };
 
-      const task = queue.addTask(repoPath, baseBranch, prompt);
+    const task = queue.addTask(repoPath, baseBranch, prompt);
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Task queued successfully!\n\nID: ${task.id}\nRepository: ${task.repoPath}\nBase Branch: ${task.baseBranch}\nCreated: ${task.createdAt}\n\nRun 'agent-todo-worker' to process this task.`,
-          },
-        ],
-      };
-    }
-
-    case 'list_tasks': {
-      const tasks = queue.listTasks();
-
-      if (tasks.length === 0) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: 'No tasks in queue.',
-            },
-          ],
-        };
-      }
-
-      const taskList = tasks
-        .map(
-          (t) =>
-            `[${t.status.toUpperCase()}] ${t.id}\n  Repo: ${t.repoPath}\n  Branch: ${t.baseBranch}\n  Created: ${t.createdAt}\n  Prompt: ${t.prompt.substring(0, 100)}${t.prompt.length > 100 ? '...' : ''}`
-        )
-        .join('\n\n');
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Tasks in queue:\n\n${taskList}`,
-          },
-        ],
-      };
-    }
-
-    case 'remove_task': {
-      const { taskId } = args as { taskId: string };
-      queue.removeTask(taskId);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Task ${taskId} removed from queue.`,
-          },
-        ],
-      };
-    }
-
-    default:
-      throw new Error(`Unknown tool: ${name}`);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Task queued successfully!\n\nID: ${task.id}\nRepository: ${task.repoPath}\nBase Branch: ${task.baseBranch}\nCreated: ${task.createdAt}\n\nRun 'agent-todo-worker' to process this task.`,
+        },
+      ],
+    };
   }
+
+  throw new Error(`Unknown tool: ${name}`);
 });
 
 async function main() {
